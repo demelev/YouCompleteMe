@@ -539,23 +539,39 @@ class YouCompleteMe( object ):
 
   def _OnCompleteDone_Csharp( self ):
     completions = self.GetCompletionsUserMayHaveCompleted()
+
+    for c in completions:
+        vimsupport.PostVimMessage("Completions : " + str(c))
+
     namespaces = [ self._GetRequiredNamespaceImport( c )
                    for c in completions ]
     namespaces = [ n for n in namespaces if n ]
-    if not namespaces:
-      return
+    if namespaces:
+        if len( namespaces ) > 1:
+          choices = [ "{0} {1}".format( i + 1, n )
+                      for i, n in enumerate( namespaces ) ]
+          choice = vimsupport.PresentDialog( "Insert which namespace:", choices )
+          if choice < 0:
+            return
+          namespace = namespaces[ choice ]
+        else:
+          namespace = namespaces[ 0 ]
 
-    if len( namespaces ) > 1:
-      choices = [ "{0} {1}".format( i + 1, n )
-                  for i, n in enumerate( namespaces ) ]
-      choice = vimsupport.PresentDialog( "Insert which namespace:", choices )
-      if choice < 0:
-        return
-      namespace = namespaces[ choice ]
-    else:
-      namespace = namespaces[ 0 ]
+        vimsupport.InsertNamespace( namespace )
 
-    vimsupport.InsertNamespace( namespace )
+    snippets = [ self._GetSnippet( c ) for c in completions ]
+    if snippets:
+        if len( snippets ) > 1:
+          choises = [ "{0} {1}".format( i + 1, n )
+                    for i, n in enumerate( snippets ) ]
+          choice = vimsupport.PresentDialog( "Insert which snippet:", choices )
+          if choice < 0:
+            return
+          snippet = snippets[ choice ]
+        else:
+          snippet = snippets[ 0 ]
+
+        vimsupport._ExpandSnippet(snippet)
 
 
   def _GetRequiredNamespaceImport( self, completion ):
@@ -563,6 +579,12 @@ class YouCompleteMe( object ):
          or "required_namespace_import" not in completion[ "extra_data" ] ):
       return None
     return completion[ "extra_data" ][ "required_namespace_import" ]
+
+  def _GetSnippet( self, completion ):
+    if ( "extra_data" not in completion
+         or "Snippet" not in completion[ "extra_data" ] ):
+      return None
+    return completion[ "extra_data" ][ "Snippet" ]
 
 
   def GetErrorCount( self ):

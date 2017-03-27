@@ -815,6 +815,11 @@ function! youcompleteme#OpenGoToList()
   exec s:python_command "vimsupport.OpenQuickFixList( True, True )"
 endfunction
 
+function! youcompleteme#ExpandSnippet(snippet)
+    echom a:snippet
+"exec s:python_command "vimsupport.PostVimMessage(" .
+"\ "'WARNING: Trying to expand snippet : " . snippet . " ')"
+endfunction
 
 function! s:ShowDiagnostics()
   exec s:python_command "ycm_state.ShowDiagnostics()"
