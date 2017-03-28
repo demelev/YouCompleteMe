@@ -278,6 +278,8 @@ class YouCompleteMe( object ):
         return self._latest_completion_request
 
     request_data[ 'working_dir' ] = utils.GetCurrentDirectory()
+    want_snippet = vimsupport.GetBoolValue( 'g:ycm_want_snippet' )
+    request_data[ 'WantSnippet' ] = want_snippet
 
     self._AddExtraConfDataIfNeeded( request_data )
     if force_semantic:
@@ -539,9 +541,6 @@ class YouCompleteMe( object ):
 
   def _OnCompleteDone_Csharp( self ):
     completions = self.GetCompletionsUserMayHaveCompleted()
-
-    for c in completions:
-        vimsupport.PostVimMessage("Completions : " + str(c))
 
     namespaces = [ self._GetRequiredNamespaceImport( c )
                    for c in completions ]

@@ -1058,5 +1058,5 @@ def _SetUpLoadedBuffer( command, filename, fix, position, watch ):
     vim.command( 'silent! normal! Gzz' )
 
 def _ExpandSnippet(snippet):
-    PostVimMessage("ExpandSnippet : %s" % snippet)
-    vim.command("call youcompleteme#ExpandSnippet('" + snippet + "')")
+    if snippet:
+        vim.command("call youcompleteme#ExpandSnippet('" + snippet + "')")

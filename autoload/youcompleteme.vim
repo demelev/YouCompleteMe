@@ -816,9 +816,41 @@ function! youcompleteme#OpenGoToList()
 endfunction
 
 function! youcompleteme#ExpandSnippet(snippet)
-    echom a:snippet
-"exec s:python_command "vimsupport.PostVimMessage(" .
-"\ "'WARNING: Trying to expand snippet : " . snippet . " ')"
+    call ExpandAutoCompleteSnippet(a:snippet)
+endfunction
+
+let s:generated_snippets = {}
+function! ExpandAutoCompleteSnippet(snippet)
+  if !g:ycm_want_snippet
+    return
+  endif
+
+  if !exists("*UltiSnips#AddSnippetWithPriority")
+    echoerr "g:ycm_want_snippet is enabled but this requires the UltiSnips plugin and it is not installed."
+    return
+  endif
+
+  let line = strpart(getline('.'), 0, col('.')-1)
+  let remove_whitespace_regex = '^\s*\(.\{-}\)\s*$'
+
+  let completion = matchstr(line, '.*\zs\s\W.\+(.*)')
+  let completion = substitute(completion, remove_whitespace_regex, '\1', '')
+
+  let should_expand_completion = len(completion) != 0
+
+  if should_expand_completion
+    let completion = split(completion, '\.')[-1]
+    let completion = split(completion, 'new ')[-1]
+    let completion = split(completion, '= ')[-1]
+
+    let snippet = a:snippet
+    if !has_key(s:generated_snippets, completion)
+      call UltiSnips#AddSnippetWithPriority(completion, snippet, completion, 'iw', 'cs', 1)
+      let s:generated_snippets[completion] = snippet
+    endif
+    call UltiSnips#CursorMoved()
+    call UltiSnips#ExpandSnippetOrJump()
+  endif
 endfunction
 
 function! s:ShowDiagnostics()
