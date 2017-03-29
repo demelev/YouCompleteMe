@@ -200,16 +200,30 @@ function! s:SetUpKeyMappings()
     " With this command, when the completion window is visible, the tab key
     " (default) will select the next candidate in the window. In vim, this also
     " changes the typed-in text to that of the candidate completion.
-    exe 'inoremap <expr>' . key .
-          \ ' pumvisible() ? "\<C-n>" : "\' . key .'"'
+    if !exists('g:ycm_dont_insert_selection') || g:ycm_dont_insert_selection == 0
+        exe 'inoremap <expr>' . key .
+              \ ' pumvisible() ? "\<C-n>" : "\' . key .'"'
+    else
+        exe 'inoremap <expr>' . key .
+          \ ' pumvisible() ? "\<Down>" : "\' . key .'"'
+    endif
   endfor
 
 
   for key in g:ycm_key_list_previous_completion
     " This selects the previous candidate for shift-tab (default)
-    exe 'inoremap <expr>' . key .
-          \ ' pumvisible() ? "\<C-p>" : "\' . key .'"'
+    if !exists('g:ycm_dont_insert_selection') || g:ycm_dont_insert_selection == 0
+        exe 'inoremap <expr>' . key .
+              \ ' pumvisible() ? "\<C-p>" : "\' . key .'"'
+    else
+        exe 'inoremap <expr>' . key .
+              \ ' pumvisible() ? "\<Up>" : "\' . key .'"'
+    endif
   endfor
+
+  if !exists('g:ycm_dont_insert_selection') || g:ycm_dont_insert_selection == 0 && g:ycm_want_snippet == 1
+      inoremap <expr> <cr> pumvisible() ? "\<C-y>" : "\<CR>"
+  endif
 
   if !empty( g:ycm_key_invoke_completion )
     let invoke_key = g:ycm_key_invoke_completion
